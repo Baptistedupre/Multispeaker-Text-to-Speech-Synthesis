@@ -38,7 +38,9 @@ def similarity_matrix(embeddings, weight, bias):
         for j in range(n_utterances):
             for k in range(n_speakers):
                 centroid = get_centroid(embeddings, i, j, k)
-                similarity_matrix[i, j, k] = torch.cosine_similarity(embeddings[i, j, :], centroid, dim=0)
+                emb = embeddings[i, j, :]
+                cossim = torch.cosine_similarity(emb, centroid, dim=0)
+                similarity_matrix[i, j, k] = cossim
 
     similarity_matrix = weight * similarity_matrix + bias
     return similarity_matrix
