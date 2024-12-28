@@ -1,17 +1,17 @@
 training: !!bool "true"
 device: "cuda"
-unprocessed_data: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/LibriSpeech/train-clean-360/*/*/*.flac'
+unprocessed_data: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/LibriSpeech/train-clean-360/*/*'
 ---
 data:
-    train_path: './train_tisv'
-    test_path: './test_tisv'
+    train_path: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/datasets/train'
+    test_path: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/datasets/test'
     data_preprocessed: !!bool "true" 
     sr: 16000
     nfft: 512 #For mel spectrogram preprocess
     window: 0.025 #(s)
     hop: 0.01 #(s)
     nmels: 40 #Number of mel energies
-    tisv_frame: 180 #Max number of time steps in input after preprocess
+    tisv_frame: 160 #Number of frames as input for the log-mel-spectrogram
 ---   
 model:
     hidden: 768 #Number of LSTM hidden layer units
@@ -23,7 +23,7 @@ train:
     N : 64 #Number of speakers in batch
     M : 10 #Number of utterances per speaker
     num_workers: 0 #number of workers for dataloader
-    train_ratio: 0.9 #Ratio of train speakers
+    ratio: 0.9 #Ratio of train speakers
     lr: 0.01 
     epochs: 950 #Max training speaker epoch 
     log_interval: 30 #Epochs before printing progress

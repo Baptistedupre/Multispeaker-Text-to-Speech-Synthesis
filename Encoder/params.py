@@ -2,25 +2,23 @@ import yaml
 
 
 class DotDict(dict):
-    """DotDict class allows accessing dictionary keys as attributes."""
+    """
+    a dictionary that supports dot notation 
+    as well as dictionary access notation 
+    usage: d = DotDict() or d = DotDict({'val1':'first'})
+    set attributes: d.val2 = 'second' or d['val2'] = 'second'
+    get attributes: d.val2 or d['val2']
+    """
+    __getattr__ = dict.__getitem__
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
 
-    def __getattr__(self, attr):
-        if attr in self:
-            return self[attr]
-        raise AttributeError(
-            f"'{self.__class__.__name__}' object has no attribute '{attr}'"
-            )
-
-    def __setattr__(self, key, value):
-        self[key] = value
-
-    def __delattr__(self, item):
-        try:
-            del self[item]
-        except KeyError:
-            raise AttributeError(
-                f"'{self.__class__.__name__}' object has no attribute '{item}'"
-                )
+    def __init__(self, dct=None):
+        dct = dict() if not dct else dct
+        for key, value in dct.items():
+            if hasattr(value, 'keys'):
+                value = DotDict(value)
+            self[key] = value
 
 
 def load_params():
