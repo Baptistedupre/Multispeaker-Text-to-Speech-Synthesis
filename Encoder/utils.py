@@ -17,13 +17,13 @@ def get_centroid(embeddings, j, i, k):
     else:
         for utterance in range(embeddings.shape[1]):
             if utterance != i:
-                centroid += embeddings[utterance, :, :]
+                centroid += embeddings[j, utterance, :]
         centroid /= embeddings.shape[1] - 1
 
     return centroid
 
 
-def similarity_matrix(embeddings, weight, bias):
+def similarity_matrix(embeddings, weight, bias, device):
     """
     Args:
         embeddings: shape (n_speakers, n_utterances, embedding_size)
@@ -42,5 +42,16 @@ def similarity_matrix(embeddings, weight, bias):
                 cossim = torch.cosine_similarity(emb, centroid, dim=0)
                 similarity_matrix[i, j, k] = cossim
 
-    similarity_matrix = weight * similarity_matrix + bias
+    similarity_matrix = weight * similarity_matrix.to(device) + bias
     return similarity_matrix
+
+
+def shuffle(tensor, perm):
+    return tensor[perm]
+
+
+def unshuffle(tensor, perm):
+    res = torch.zeros_like(tensor)
+    for i, p in enumerate(perm):
+        res[p] = tensor[i]
+    return res

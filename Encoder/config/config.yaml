@@ -1,11 +1,10 @@
 training: !!bool "true"
-device: "cuda"
+device: "mps"
 unprocessed_data: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/LibriSpeech/train-clean-360/*/*'
 ---
 data:
     train_path: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/datasets/train'
     test_path: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/datasets/test'
-    data_preprocessed: !!bool "true" 
     sr: 16000
     nfft: 512 #For mel spectrogram preprocess
     window: 0.025 #(s)
@@ -15,13 +14,13 @@ data:
 ---   
 model:
     hidden: 768 #Number of LSTM hidden layer units
-    num_layer: 3 #Number of LSTM layers
+    nb_layers: 3 #Number of LSTM layers
     proj: 256 #Embedding size
-    model_path: './model.model' #Model path for testing, inference, or resuming training
+    model_path: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/model ' #Model path for testing, inference, or resuming training
 ---
 train:
-    N : 64 #Number of speakers in batch
-    M : 10 #Number of utterances per speaker
+    N : 4 #Number of speakers in batch
+    M : 5 #Number of utterances per speaker
     num_workers: 0 #number of workers for dataloader
     ratio: 0.9 #Ratio of train speakers
     lr: 0.01 
@@ -29,7 +28,7 @@ train:
     log_interval: 30 #Epochs before printing progress
     log_file: './speech_id_checkpoint/Stats'
     checkpoint_interval: 120 #Save model after x speaker epochs
-    checkpoint_dir: './speech_id_checkpoint'
+    checkpoint_dir: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/model /checkpoints'
     restore: !!bool "false" #Resume training from previous model path
 ---
 test:
