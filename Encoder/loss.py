@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from utils import similarity_matrix
+from utils import similarity_matrix, calc_loss
 
 
 class GE2ELoss(nn.Module):
@@ -12,11 +12,12 @@ class GE2ELoss(nn.Module):
         self.device = device
 
     def forward(self, embeddings):
+        """
         loss_matrix = torch.zeros(embeddings.shape[:2])
         sim_matrix = similarity_matrix(embeddings, self.w, self.b, self.device)
-        idx = list(range(embeddings.shape[0]))
-        pos = sim_matrix[idx, :, idx]
-        neg = torch.log(torch.sum(torch.exp(sim_matrix), dim=2))
-        loss_matrix = neg - pos
-        loss = torch.sum(loss_matrix)
+        loss, _ = calc_loss(sim_matrix)
+        """
+        torch.clamp(self.w, 1e-6)
+        sim_matrix = similarity_matrix(embeddings, self.w, self.b, 'cpu') # noqa E501
+        loss, _ = calc_loss(sim_matrix)
         return loss

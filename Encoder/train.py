@@ -34,7 +34,7 @@ def train():
     optimizer = torch.optim.SGD([
                 {'params': model.parameters()},
                 {'params': ge2e_loss.parameters()}
-            ], lr=hp.train.lr*0.01)
+            ], lr=hp.train.lr)
 
     os.makedirs(hp.train.checkpoint_dir, exist_ok=True)
 
