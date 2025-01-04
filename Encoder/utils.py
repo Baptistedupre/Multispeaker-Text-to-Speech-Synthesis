@@ -48,6 +48,23 @@ def similarity_matrix(embeddings, weight, bias, device):
     return similarity_matrix
 
 
+def similarity_matrix_centroids(embeddings, centroids, device):
+    n_speakers_verif = embeddings.shape[0]
+    n_utterances = embeddings.shape[1]
+    n_speakers_enrolled = centroids.shape[0]
+    similarity_matrix = torch.zeros((n_speakers_verif, n_utterances, n_speakers_enrolled)) # noqa E501
+
+    for j in range(n_speakers_verif):
+        for i in range(n_utterances):
+            emb = embeddings[j, i, :]
+            for k in range(n_speakers_enrolled):
+                centroid = centroids[k]
+                cossim = F.cosine_similarity(emb, centroid, dim=0) + 1e-6
+                similarity_matrix[j, i, k] = cossim
+
+    return similarity_matrix
+
+
 def calc_loss(similarity_matrix):
     idx = list(range(similarity_matrix.size(0)))
     pos = sim_matrix[idx, :, idx]
@@ -74,4 +91,5 @@ if __name__ == "__main__":
     embeddings = torch.tensor([[0,1,0],[0,0,1], [0,1,0], [0,1,0], [1,0,0], [1,0,0]]).to(torch.float).reshape(3,2,3) # noqa E501
     sim_matrix = similarity_matrix(embeddings, w, b, 'cpu')
     loss, per_embedding_loss = calc_loss(sim_matrix)
-    print(sim_matrix, loss)
+    mask = sim_matrix > 2e-6
+    print(mask[0].float().sum())

@@ -1,10 +1,10 @@
 training: !!bool "true"
 device: "mps"
-unprocessed_data: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/LibriSpeech/train-clean-360/*/*'
+unprocessed_data: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/Datasets/LibriSpeech/train-clean-360/*/*'
 ---
 data:
-    train_path: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/datasets/train'
-    test_path: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/datasets/test'
+    train_path: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/Datasets/train'
+    test_path: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/Datasets/test'
     sr: 16000
     nfft: 512 #For mel spectrogram preprocess
     window: 0.025 #(s)
@@ -16,7 +16,7 @@ model:
     hidden: 768 #Number of LSTM hidden layer units
     nb_layers: 3 #Number of LSTM layers
     proj: 64 #Embedding size
-    model_path: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/model' #Model path for testing, inference, or resuming training
+    model_path: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/Model' #Model path for testing, inference, or resuming training
 ---
 train:
     N : 6 #Number of speakers in batch
@@ -24,15 +24,15 @@ train:
     num_workers: 0 #number of workers for dataloader
     ratio: 0.9 #Ratio of train speakers
     lr: 0.01 
-    epochs: 950 #Max training speaker epoch 
+    epochs: 800 #Max training speaker epoch 
     log_interval: 30 #Epochs before printing progress
-    log_file: './speech_id_checkpoint/Stats'
     checkpoint_interval: 120 #Save model after x speaker epochs
-    checkpoint_dir: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/model/checkpoints'
+    checkpoint_dir: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/Model/checkpoints'
     restore: !!bool "false" #Resume training from previous model path
 ---
 test:
-    N : 64 #Number of speakers in batch
-    M : 10 #Number of utterances per speaker
+    N : 10 #Number of speakers in batch
+    M : 20 #Number of utterances per speaker
+    enroll_ratio: 0.8 #Ratio of enroll speakers
     num_workers: 8 #number of workers for data laoder
     epochs: 10 #testing speaker epochs

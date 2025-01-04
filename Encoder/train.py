@@ -77,7 +77,7 @@ def train():
                 "optimizer_state": optimizer.state_dict(),
             }, os.path.join(hp.train.checkpoint_dir, 'checkpoint.pt'))
 
-    save_model_path = os.path.join(hp.train.checkpoint_dir, "model_final.pt")
+    save_model_path = os.path.join(hp.model.model_path, "model_final.pt")
     torch.save(model.state_dict(), save_model_path)
     print("\nDone, trained model saved at", save_model_path)
 
