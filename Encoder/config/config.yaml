@@ -33,6 +33,6 @@ train:
 test:
     N : 10 #Number of speakers in batch
     M : 20 #Number of utterances per speaker
-    enroll_ratio: 0.2 #Ratio of enroll speakers
+    enroll_ratio: 0.1 #Ratio of enroll speakers
     num_workers: 8 #number of workers for data laoder
     epochs: 10 #testing speaker epochs
