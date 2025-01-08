@@ -3,31 +3,6 @@ import torch.nn as nn
 
 from params import hparams as hp
 from layers import LinearNorm, ConvNorm
-
-
-
-class LocationLayer(nn.Module):
-
-
-    
-
-class Prenet(nn.Module):
-    def __init__(self):
-        super(Prenet, self).__init__()
-
-        self.layers = nn.ModuleList([
-            nn.Linear(hp.model.encoder_embedding, hp.model.prenet_dim),
-            nn.ReLU(),
-            nn.Dropout(hp.model.p_prenet_dropout),
-            nn.Linear(hp.model.prenet_dim, hp.model.prenet_dim),
-            nn.ReLU(),
-            nn.Dropout(hp.model.p_prenet_dropout)
-        ])
-
-    def forward(self, x):
-        for layer in self.layers:
-            x = layer(x)
-        return x
     
 
 class Postnet(nn.Module):

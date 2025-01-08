@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.nn import functional as F
 
 from params import hparams as hp
-from layers import LinearNorm, ConvNorm
+from layers import LinearNorm, ConvNorm, LocationLayer
 
 
 class Encoder(nn.Module):
@@ -54,11 +54,8 @@ class Encoder(nn.Module):
         return torch.cat((x, e), dim=2)
 
 
-
-
-
 class Attention(nn.Module):
-    def __init__(self, attention_lstm_dim, attention_dim, 
+    def __init__(self, attention_lstm_dim, attention_dim,
                  encoder_embedding_dim, attention_location_n_filters,
                  attention_location_kernel_size):
         super(Attention, self).__init__()
@@ -92,3 +89,26 @@ class Attention(nn.Module):
         attention_context = torch.bmm(attention_weights.unsqueeze(1), memory).squeeze(1) # noqa E501
 
         return attention_context, attention_weights
+
+
+class Prenet(nn.Module):
+    def __init__(self, in_dims, fc1_dims, fc2_dims, dropout):
+        super(Prenet, self).__init__()
+
+        self.fc1 = nn.Linear(in_dims, fc1_dims)
+        self.fc2 = nn.Linear(fc1_dims, fc2_dims)
+        self.dropout = dropout
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = F.relu(x)
+        x = F.dropout(x, p=self.dropout, training=True)
+        x = self.fc2(x)
+        x = F.relu(x)
+        x = F.dropout(x, p=self.dropout, training=True)
+
+        return x
+
+
+class Postnet(nn.Module):
+    def __init__(self, )
