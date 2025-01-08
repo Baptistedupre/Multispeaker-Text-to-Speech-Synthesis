@@ -92,22 +92,15 @@ class Attention(nn.Module):
 
 
 class Prenet(nn.Module):
-    def __init__(self, in_dims, fc1_dims, fc2_dims, dropout):
+    def __init__(self):
         super(Prenet, self).__init__()
 
-        self.fc1 = nn.Linear(in_dims, fc1_dims)
-        self.fc2 = nn.Linear(fc1_dims, fc2_dims)
-        self.dropout = dropout
+        self.fc1 = nn.Linear(hp.model.num_mels, hp.model.prenet_dim)
+        self.fc2 = nn.Linear(hp.model.prenet_dim, hp.hp.model.prenet_dim)
 
     def forward(self, x):
-        x = self.fc1(x)
-        x = F.relu(x)
-        x = F.dropout(x, p=self.dropout, training=True)
-        x = self.fc2(x)
-        x = F.relu(x)
-        x = F.dropout(x, p=self.dropout, training=True)
-
-        return x
+        x = F.dropout(F.relu(self.fc1(x)), p=0.5, training=True)
+        return F.dropout(F.relu(self.fc2(x)), p=0.5, training=True)
 
 
 class Postnet(nn.Module):
@@ -117,21 +110,71 @@ class Postnet(nn.Module):
         self.convolutions = nn.ModuleList()
 
         self.convolutions.append(
-            ConvNorm(hp.model.decoder_embedding,
-                     hp.model.postnet_embedding,
-                     kernel_size=5, stride=1,
-                     padding=int((5 - 1) / 2),
-                     dilation=1)
+            nn.Sequential(
+                ConvNorm(hp.model.num_mels,
+                         hp.model.postnet_embedding_dim,
+                         kernel_size=hp.model.postnet_kernel_size, stride=1,
+                         padding=int((hp.model.postnet_kernel_size - 1) / 2),
+                         dilation=1),
+                nn.BatchNorm1d(hp.model.postnet_embedding_dim)
+            )
         )
+
+        for i in range(1, hp.model.postnet_n_convolutions - 1):
+            self.convolutions.append(
+                nn.Sequential(
+                    ConvNorm(hp.model.postnet_embedding_dim,
+                             hp.model.postnet_embedding_dim,
+                             kernel_size=hp.model.postnet_kernel_size, stride=1,
+                             padding=int((hp.model.postnet_kernel_size - 1) / 2),
+                             dilation=1),
+                    nn.BatchNorm1d(hp.model.postnet_embedding_dim)
+                )
+            )
+
+        self.convolutions.append(
+            nn.Sequential(
+                ConvNorm(hp.model.postnet_embedding_dim,
+                         hp.model.num_mels,
+                         kernel_size=hp.model.postnet_kernel_size, stride=1,
+                         padding=int((hp.model.postnet_kernel_size - 1) / 2),
+                         dilation=1),
+                nn.BatchNorm1d(hp.model.num_mels)
+            )
+        )
+
+    def forward(self, x):
+        for i in range(len(self.convolutions) - 1):
+            x = F.dropout(torch.tanh(self.convolutions[i](x)), hp.model.p_decoder_dropout) # noqa E501
+
+        return F.dropout(self.convolutions[-1](x), hp.model.p_decoder_dropout)
 
 
 class Decoder(nn.Module):
     def __init__(self):
         super(Decoder, self).__init__()
 
-        self.prenet = Prenet(hp.model.decoder_embedding,
-                             hp.model.prenet_dim,
-                             hp.model.prenet_dim,
-                             hp.model.prenet_dropout)
-        
-        self.lstm_stack = 
+        self.prenet = Prenet()
+
+        self.lstm1 = nn.LSTMCell(hp.model.attention_dim + hp.model.prenet_dim,
+                                 hp.model.decoder_lstm_dim)
+
+        self.lstm2 = nn.LSTMCell(hp.model.decoder_lstm_dim + hp.model.attention_dim, # noqa E501
+                                 hp.model.decoder_lstm_dim)
+
+        self.linear_projection = LinearNorm(hp.model.decoder_lstm_dim + hp.model.attention_dim, # noqa E501
+                                            hp.model.num_mels * hp.model.n_frames_per_step) # noqa E501)
+
+        self.gate_layer = LinearNorm(hp.model.decoder_lstm_dim + hp.model.attention_dim, 1,  # noqa E501
+                                     w_init_gain='sigmoid') # noqa E501
+
+        self.post_net = Postnet()
+
+    def get_stop_token(self, x):
+        return self.linear_projection(x)
+
+    def forward(self, x, memory, attention_weights_cat):
+        x = self.prenet(x)
+        x, _ = self.lstm(x)
+        x = self.linear_projection(x)
+        return x

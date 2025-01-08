@@ -60,5 +60,5 @@ model:
 
     # Mel-post processing network parameters
     postnet_embedding_dim: 512
-    postnet_kernel_siz: 5
+    postnet_kernel_size: 5
     postnet_n_convolutions: 5
