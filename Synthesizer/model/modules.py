@@ -111,4 +111,27 @@ class Prenet(nn.Module):
 
 
 class Postnet(nn.Module):
-    def __init__(self, )
+    def __init__(self):
+        super(Postnet, self).__init__()
+
+        self.convolutions = nn.ModuleList()
+
+        self.convolutions.append(
+            ConvNorm(hp.model.decoder_embedding,
+                     hp.model.postnet_embedding,
+                     kernel_size=5, stride=1,
+                     padding=int((5 - 1) / 2),
+                     dilation=1)
+        )
+
+
+class Decoder(nn.Module):
+    def __init__(self):
+        super(Decoder, self).__init__()
+
+        self.prenet = Prenet(hp.model.decoder_embedding,
+                             hp.model.prenet_dim,
+                             hp.model.prenet_dim,
+                             hp.model.prenet_dropout)
+        
+        self.lstm_stack = 
