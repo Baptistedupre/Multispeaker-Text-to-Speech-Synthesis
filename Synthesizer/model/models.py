@@ -21,8 +21,8 @@ class Tacotron2(nn.Module):
 
         return mel_outputs, mel_outputs_postnet, gate_outputs, alignments
 
-    def inference(self, inputs):
-        encoder_outputs = self.encoder.inference(inputs)
+    def inference(self, inputs, speaker_embedding=None):
+        encoder_outputs = self.encoder(inputs)
         mel_outputs, gate_outputs, alignments = self.decoder.inference(encoder_outputs) # noqa E501
 
         mel_outputs_postnet = self.postnet(mel_outputs)
