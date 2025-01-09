@@ -55,21 +55,19 @@ class Encoder(nn.Module):
 
 
 class Attention(nn.Module):
-    def __init__(self, attention_lstm_dim, attention_dim,
-                 encoder_embedding_dim, attention_location_n_filters,
-                 attention_location_kernel_size):
+    def __init__(self):
         super(Attention, self).__init__()
 
-        self.query_layer = LinearNorm(attention_lstm_dim,
-                                      attention_dim,
+        self.query_layer = LinearNorm(hp.model.attention_lstm_dim,
+                                      hp.model.attention_dim,
                                       w_init_gain='tanh')
-        self.memory_layer = LinearNorm(encoder_embedding_dim,
-                                       attention_dim,
+        self.memory_layer = LinearNorm(hp.model.encoder_embedding_dim,
+                                       hp.model.attention_dim,
                                        w_init_gain='tanh')
-        self.location_layer = LocationLayer(attention_location_n_filters,
-                                            attention_location_kernel_size,
-                                            attention_dim)
-        self.w = LinearNorm(attention_dim, 1, w_init_gain='tanh')
+        self.location_layer = LocationLayer(hp.model.attention_location_n_filters, # noqa E501
+                                            hp.model.attention_location_kernel_size, # noqa E501
+                                            hp.model.attention_dim)
+        self.w = LinearNorm(hp.model.attention_dim, 1, w_init_gain='tanh')
 
     def alignement_energies(self, query, memory, attention_weights_cat):
 
@@ -156,6 +154,8 @@ class Decoder(nn.Module):
 
         self.prenet = Prenet()
 
+        self.attention = Attention()
+
         self.lstm1 = nn.LSTMCell(hp.model.attention_dim + hp.model.prenet_dim,
                                  hp.model.decoder_lstm_dim)
 
@@ -169,6 +169,8 @@ class Decoder(nn.Module):
                                      w_init_gain='sigmoid') # noqa E501
 
         self.post_net = Postnet()
+
+    def 
 
     def get_stop_token(self, x):
         return self.linear_projection(x)
