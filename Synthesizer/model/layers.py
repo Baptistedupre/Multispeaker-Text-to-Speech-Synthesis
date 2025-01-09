@@ -31,22 +31,3 @@ class Conv(torch.nn.Module):
 
     def forward(self, x):
         return self.conv_layer(x)
-
-
-class LocationLayer(nn.Module):
-    def __init__(self, attention_n_filters, attention_kernel_size, attention_dim): # noqa E501
-        super(LocationLayer, self).__init__()
-
-        self.location_conv = Conv(1, attention_n_filters,
-                                  kernel_size=attention_kernel_size,
-                                  padding=int((attention_kernel_size - 1) / 2), # noqa E501
-                                  stride=1, dilation=1)
-        self.location_dense = Linear(attention_n_filters,
-                                     attention_dim,
-                                     w_init_gain='tanh')
-
-    def forward(self, attention_weights_cat):
-        attention = self.location_conv(attention_weights_cat)
-        attention = attention.transpose(1, 2)
-        attention = self.location_dense(attention)
-        return attention
