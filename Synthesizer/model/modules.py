@@ -125,8 +125,8 @@ class Postnet(nn.Module):
                 nn.Sequential(
                     ConvNorm(hp.model.postnet_embedding_dim,
                              hp.model.postnet_embedding_dim,
-                             kernel_size=hp.model.postnet_kernel_size, stride=1,
-                             padding=int((hp.model.postnet_kernel_size - 1) / 2),
+                             kernel_size=hp.model.postnet_kernel_size, stride=1, # noqa E501
+                             padding=int((hp.model.postnet_kernel_size - 1) / 2), # noqa E501
                              dilation=1),
                     nn.BatchNorm1d(hp.model.postnet_embedding_dim)
                 )
@@ -163,7 +163,7 @@ class Decoder(nn.Module):
                                  hp.model.decoder_lstm_dim)
 
         self.linear_projection = LinearNorm(hp.model.decoder_lstm_dim + hp.model.attention_dim, # noqa E501
-                                            hp.model.num_mels * hp.model.n_frames_per_step) # noqa E501)
+                                            hp.model.num_mels)
 
         self.gate_layer = LinearNorm(hp.model.decoder_lstm_dim + hp.model.attention_dim, 1,  # noqa E501
                                      w_init_gain='sigmoid') # noqa E501
