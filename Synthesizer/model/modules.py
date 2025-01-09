@@ -1,19 +1,23 @@
 import torch
-import torch.nn as nn
 from math import sqrt
+import torch.nn as nn
 from torch.autograd import Variable
 from torch.nn import functional as F
 
 from params import hparams as hp
 from layers import LinearNorm, ConvNorm, LocationLayer
-from utils import to_gpu, get_mask_from_lengths
+from utils import get_mask_from_lengths
 
 
 class Encoder(nn.Module):
     def __init__(self):
         super(Encoder, self).__init__()
 
-        self.embedding = nn.Embedding
+        self.embedding = nn.Embedding(
+            hp.model.n_symbols, hp.model.symbols_embedding_dim)
+        std = sqrt(2.0 / (hp.model.n_symbols + hp.model.symbols_embedding_dim))
+        val = sqrt(3.0) * std  # uniform bounds for std
+        self.embedding.weight.data.uniform_(-val, val)
 
         convolutions = []
         for i in range(hp.model.encoder_n_convolutions):
