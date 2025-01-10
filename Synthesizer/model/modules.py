@@ -162,6 +162,14 @@ class FeedForwardNetwork(nn.Module):
         return x
 
 
+class PostNet(nn.Module):
+    def __init__(self):
+        super(PostNet, self).__init__()
+
+        convolutions = []
+        convolutions.append()
+
+
 class Encoder(nn.Module):
     def __init__(self):
         super(Encoder, self).__init__()
@@ -212,7 +220,9 @@ class Decoder(nn.Module):
                                                       hp.model.num_mels,
                                                       dropout=0.1)
         self.feed_forward = FeedForwardNetwork()
-
+        self.mel_linear = Linear(hp.model.dim_model, hp.model.num_mels)
+        self.gate_linear = Linear(hp.model.dim_model, 1)
+        self.postnet = PostNet()
                                                       
         
 
