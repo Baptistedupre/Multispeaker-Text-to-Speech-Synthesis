@@ -10,7 +10,6 @@ from utils import get_sinusoid_encoding_table
 
 
 class PositionalEncoding(nn.Module):
-
     def __init__(self, n_position, d_model, dropout=0.1):
         super(PositionalEncoding, self).__init__()
 
@@ -163,12 +162,39 @@ class FeedForwardNetwork(nn.Module):
 
 
 class PostNet(nn.Module):
-    def __init__(self):
+    def __init__(self, dropout=0.5):
         super(PostNet, self).__init__()
 
         convolutions = []
-        convolutions.append()
+        convolutions.append(Conv(hp.model.num_mels,
+                                 hp.model.dim_model, 
+                                 kernel_size=5,
+                                 padding=4,
+                                 w_init_gain='tanh'))
+        
+        for i in range(1, hp.model.n_postnet_convolutions - 1):
+            convolutions.append(Conv(hp.model.dim_model,
+                                     hp.model.dim_model,
+                                     kernel_size=5,
+                                     padding=4,
+                                     w_init_gain='tanh'))
+        
+        convolutions.append(Conv(hp.model.dim_model,
+                                 hp.model.num_mels,
+                                 kernel_size=5,
+                                 padding=4,
+                                 w_init_gain='linear'))
+        self.convolutions = nn.ModuleList(convolutions)
 
+        self.batch_norm = nn.BatchNorm1d(hp.model.dim_model)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x):
+        for conv in self.convolutions[:-1]:
+            x = self.dropout(torch.tanh(self.batch_norm(conv(x))))
+        x = self.dropout(self.batch_norm(self.convolutions[-1](x)))
+        
+        return x
 
 class Encoder(nn.Module):
     def __init__(self):
@@ -223,6 +249,7 @@ class Decoder(nn.Module):
         self.mel_linear = Linear(hp.model.dim_model, hp.model.num_mels)
         self.gate_linear = Linear(hp.model.dim_model, 1)
         self.postnet = PostNet()
-                                                      
+
+    def forward(self, mel, encoder_output, c_mask, pos):                            
         
 
