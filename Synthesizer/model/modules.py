@@ -6,28 +6,22 @@ from torch.nn import functional as F
 
 from params import hparams as hp
 from layers import Linear, Conv
+from utils import get_sinusoid_encoding_table
 
 
 class PositionalEncoding(nn.Module):
 
-    def __init__(self, d_model, n_position=200):
+    def __init__(self, n_position, d_model, dropout=0.1):
         super(PositionalEncoding, self).__init__()
 
-        self.register_buffer('pos_table', self._get_sinusoid_encoding_table(n_position, d_model)) # noqa E501
-
-    def _get_sinusoid_encoding_table(self, n_position, d_model):
-
-        def get_position_angle_vec(position):
-            return [position / np.power(10000, 2 * (hid_j // 2) / d_model) for hid_j in range(d_model)] # noqa E501
-
-        sinusoid_table = np.array([get_position_angle_vec(pos_i) for pos_i in range(n_position)]) # noqa E501
-        sinusoid_table[:, 0::2] = np.sin(sinusoid_table[:, 0::2])
-        sinusoid_table[:, 1::2] = np.cos(sinusoid_table[:, 1::2])
-
-        return torch.FloatTensor(sinusoid_table).unsqueeze(0)
+        self.pos_embedding = nn.Embedding.from_pretrained(
+            get_sinusoid_encoding_table(n_position, d_model, padding_idx=0),
+            freeze=True)
 
     def forward(self, x):
-        return x + self.pos_table[:, :x.size(1)].clone().detach()
+        pos = self.pos_embedding(x)
+
+        return pos
 
 
 class EncoderPreNet(nn.Module):
@@ -71,7 +65,7 @@ class DecoderPreNet(nn.Module):
         super(DecoderPreNet, self).__init__()
 
         self.fc1 = nn.Linear(hp.model.num_mels, hp.model.prenet_dim)
-        self.fc2 = nn.Linear(hp.model.prenet_dim, hp.hp.model.prenet_dim)
+        self.fc2 = nn.Linear(hp.model.prenet_dim, hp.model.prenet_dim)
 
         self.dropout = nn.Dropout(hp.model.p_decoder_dropout)
         self.relu = nn.ReLU()
@@ -172,6 +166,7 @@ class Encoder(nn.Module):
     def __init__(self):
         super(Encoder, self).__init__()
 
+        self.alpha = nn.Parameter(torch.ones(1))
         self.encoder_prenet = EncoderPreNet()
         self.positional_encoding = PositionalEncoding(hp.model.dim_model)
         self.multihead_attention = MultiHeadAttention(hp.model.n_head,
@@ -180,3 +175,44 @@ class Encoder(nn.Module):
                                                       hp.model.encoder_embedding_dim + hp.model.speaker_embedding_dim, # noqa E501
                                                       dropout=0.1) # noqa E501
         self.feed_forward = FeedForwardNetwork()
+        self.pos_dropout = nn.Dropout(dropout=0.1)
+
+    def forward(self, x, speaker_embedding, pos):
+        if self.training:
+            c_mask = pos.ne(0).type(float)
+            mask = pos.eq(0).unsqueeze(1).repeat(1, x.size(1), 1)
+        else:
+            c_mask, mask = None, None
+
+        x = self.encoder_prenet(x)
+
+        pos = self.positional_encoding(pos)
+        x = self.pos_dropout(x + pos*self.alpha)
+
+        x, attention = self.multihead_attention(x, x, mask=mask)
+        x = self.feed_forward(x)
+
+        return x, c_mask, attention
+
+
+class Decoder(nn.Module):
+    def __init__(self):
+        super(Decoder, self).__init__()
+
+        self.decoder_prenet = DecoderPreNet()
+        self.positional_encoding = PositionalEncoding(hp.model.dim_model)
+        self.masked_multihead_attention = MultiHeadAttention(hp.model.n_head,
+                                                             hp.model.dim_model, # noqa E501
+                                                             hp.model.num_mels,
+                                                             hp.model.num_mels,
+                                                             dropout=0.1)
+        self.multihead_attention = MultiHeadAttention(hp.model.n_head,
+                                                      hp.model.dim_model,
+                                                      hp.model.num_mels,
+                                                      hp.model.num_mels,
+                                                      dropout=0.1)
+        self.feed_forward = FeedForwardNetwork()
+
+                                                      
+        
+
