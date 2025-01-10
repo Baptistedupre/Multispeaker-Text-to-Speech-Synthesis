@@ -36,10 +36,11 @@ model:
     n_symbols: len(symbols)
     symbols_embedding_dim: 512
 
-    # Encoder parameters
+    # Encoder Prenet parameters
     encoder_kernel_size: 5
     encoder_n_convolution: 3
     encoder_embedding_dim: 512
+    encoder_dropout: 0.2
 
     # Decoder parameters
     n_frames_per_step: 1
@@ -48,7 +49,7 @@ model:
     max_decoder_ratio: 10
     gate_threshold: 0.5
     p_attention_dropout: 0.1
-    p_decoder_dropout: 0.1
+    p_decoder_dropout: 0.5
 
     # Attention parameters
     attention_lstm_dim: 1024
