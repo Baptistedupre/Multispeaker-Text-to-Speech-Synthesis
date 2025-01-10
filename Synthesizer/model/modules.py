@@ -169,8 +169,14 @@ class FeedForwardNetwork(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self): 
+    def __init__(self):
         super(Encoder, self).__init__()
 
         self.encoder_prenet = EncoderPreNet()
         self.positional_encoding = PositionalEncoding(hp.model.dim_model)
+        self.multihead_attention = MultiHeadAttention(hp.model.n_head,
+                                                      hp.model.dim_model,
+                                                      hp.model.encoder_embedding_dim + hp.model.speaker_embedding_dim, # noqa E501
+                                                      hp.model.encoder_embedding_dim + hp.model.speaker_embedding_dim, # noqa E501
+                                                      dropout=0.1) # noqa E501
+        self.feed_forward = FeedForwardNetwork()
