@@ -33,14 +33,17 @@ model:
     fmax: 8000
     power: 1.5
     gl_iters: 30
-    n_symbols: len(symbols)
     symbols_embedding_dim: 512
+    dim_model: 256
+    n_head: 3
 
     # Encoder Prenet parameters
     encoder_kernel_size: 5
-    encoder_n_convolution: 3
+    encoder_n_convolutions: 3
     encoder_embedding_dim: 512
     encoder_dropout: 0.2
+    speaker_embedding_dim: 64
+    dim_feedforward: 2048
 
     # Decoder parameters
     n_frames_per_step: 1
@@ -62,4 +65,4 @@ model:
     # Mel-post processing network parameters
     postnet_embedding_dim: 512
     postnet_kernel_size: 5
-    postnet_n_convolutions: 5
+    n_postnet_convolutions: 5

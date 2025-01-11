@@ -1,33 +1,50 @@
 import torch
 import numpy as np
-from math import sqrt
+from math import sqrt, log
 import torch.nn as nn
 from torch.nn import functional as F
 
+from text.symbols import symbols
 from params import hparams as hp
-from layers import Linear, Conv
-from utils import get_sinusoid_encoding_table
+from .layers import Linear, Conv
 
 
 class PositionalEncoding(nn.Module):
-    def __init__(self, n_position, d_model, dropout=0.1):
+    def __init__(self, input_size, max_len=2500):
         super(PositionalEncoding, self).__init__()
 
-        self.pos_embedding = nn.Embedding.from_pretrained(
-            get_sinusoid_encoding_table(n_position, d_model, padding_idx=0),
-            freeze=True)
+        if input_size % 2 != 0:
+            raise ValueError(
+                f"Cannot use sin/cos positional encoding with odd channels (got channels={input_size})" # noqa E501
+            )
+
+        self.max_len = max_len
+        pe = torch.zeros(self.max_len, input_size, requires_grad=False)
+        positions = torch.arange(0, self.max_len).unsqueeze(1).float()
+        denominator = torch.exp(
+            torch.arange(0, input_size, 2).float()
+            * -(log(10000.0) / input_size)
+        )
+
+        pe[:, 0::2] = torch.sin(positions * denominator)
+        pe[:, 1::2] = torch.cos(positions * denominator)
+        pe = pe.unsqueeze(0)
+        self.register_buffer("pe", pe)
+
+        self.alpha = nn.Parameter(torch.Tensor(1))
+
+        nn.init.normal_(self.alpha)
 
     def forward(self, x):
-        pos = self.pos_embedding(x)
-
-        return pos
+        scaled_pos_embedding = self.alpha * self.pe[:, : x.size(1)].clone().detach() # noqa E501
+        return scaled_pos_embedding
 
 
 class EncoderPreNet(nn.Module):
     def __init__(self):
         super(EncoderPreNet, self).__init__()
 
-        self.embedding = nn.Embedding(hp.model.n_symbols,
+        self.embedding = nn.Embedding(len(symbols),
                                       hp.model.encoder_embedding_dim,
                                       padding_idx=0)
 
@@ -143,7 +160,7 @@ class MultiHeadAttention(nn.Module):
 
 
 class FeedForwardNetwork(nn.Module):
-    def __init__(self, dropout=0.5):
+    def __init__(self, dropout=0.1):
         super(FeedForwardNetwork, self).__init__()
 
         self.fc1 = Linear(hp.model.dim_model,
@@ -152,7 +169,7 @@ class FeedForwardNetwork(nn.Module):
         self.fc2 = Linear(hp.model.dim_feedforward,
                           hp.model.dim_model)
 
-        self.dropout = nn.Dropout(hp.model.dropout)
+        self.dropout = nn.Dropout(dropout)
         self.layer_norm = nn.LayerNorm(hp.model.dim_model)
 
     def forward(self, x):
@@ -203,7 +220,7 @@ class PostNet(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self):
+    def __init__(self, dropout=0.1):
         super(Encoder, self).__init__()
 
         self.alpha = nn.Parameter(torch.ones(1))
@@ -213,9 +230,9 @@ class Encoder(nn.Module):
                                                       hp.model.dim_model,
                                                       hp.model.encoder_embedding_dim + hp.model.speaker_embedding_dim, # noqa E501
                                                       hp.model.encoder_embedding_dim + hp.model.speaker_embedding_dim, # noqa E501
-                                                      dropout=0.1) # noqa E501
+                                                      dropout) # noqa E501
         self.feed_forward = FeedForwardNetwork()
-        self.pos_dropout = nn.Dropout(dropout=0.1)
+        self.pos_dropout = nn.Dropout(dropout)
 
     def forward(self, x, speaker_embedding, pos):
         if self.training:
@@ -236,23 +253,23 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self):
+    def __init__(self, dropout=0.1):
         super(Decoder, self).__init__()
 
         self.alpha = nn.Parameter(torch.ones(1))
         self.decoder_prenet = DecoderPreNet()
         self.positional_encoding = PositionalEncoding(hp.model.dim_model)
-        self.pos_dropout = nn.Dropout(dropout=0.1)
+        self.pos_dropout = nn.Dropout(dropout)
         self.masked_multihead_attention = MultiHeadAttention(hp.model.n_head,
                                                              hp.model.dim_model, # noqa E501
                                                              hp.model.num_mels,
                                                              hp.model.num_mels,
-                                                             dropout=0.1)
+                                                             dropout)
         self.multihead_attention = MultiHeadAttention(hp.model.n_head,
                                                       hp.model.dim_model,
                                                       hp.model.num_mels,
                                                       hp.model.num_mels,
-                                                      dropout=0.1)
+                                                      dropout)
         self.feed_forward = FeedForwardNetwork()
         self.mel_linear = Linear(hp.model.dim_model, hp.model.num_mels)
         self.gate_linear = Linear(hp.model.dim_model, 1)

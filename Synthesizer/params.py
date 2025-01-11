@@ -22,7 +22,7 @@ class DotDict(dict):
 
 
 def load_params():
-    with open('synthesizer/config/config.yaml', 'r') as f:
+    with open('config/config.yaml', 'r') as f:
         params = yaml.load_all(f, Loader=yaml.FullLoader)
         dict_params = {}
         for doc in params:
