@@ -114,7 +114,7 @@ class MultiHeadAttention(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.layer_norm = nn.LayerNorm(d_model)
 
-    def forward(self, memory, decoder_output, mask=None, key_padding_mask=None):
+    def forward(self, memory, decoder_output, mask=None, key_padding_mask=None): # noqa E501
 
         batch_size = memory.size(0)
 
@@ -172,7 +172,7 @@ class PostNet(nn.Module):
 
         convolutions = []
         convolutions.append(Conv(hp.model.num_mels,
-                                 hp.model.dim_model, 
+                                 hp.model.dim_model,
                                  kernel_size=5,
                                  padding=4,
                                  w_init_gain='tanh'))
