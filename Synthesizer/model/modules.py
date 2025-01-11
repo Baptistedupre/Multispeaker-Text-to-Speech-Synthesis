@@ -69,9 +69,12 @@ class DecoderPreNet(nn.Module):
         self.dropout = nn.Dropout(hp.model.p_decoder_dropout)
         self.relu = nn.ReLU()
 
+        self.linear = nn.Linear(hp.model.prenet_dim, hp.model.dim_model)
+
     def forward(self, x):
         x = self.dropout(self.relu(self.fc1(x)))
-        return self.dropout(self.relu(self.fc2(x)))
+        x = self.dropout(self.relu(self.fc2(x)))
+        return self.linear(x)
 
 
 class Attention(nn.Module):
@@ -111,7 +114,7 @@ class MultiHeadAttention(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.layer_norm = nn.LayerNorm(d_model)
 
-    def forward(self, memory, decoder_output, mask=None):
+    def forward(self, memory, decoder_output, mask=None, key_padding_mask=None):
 
         batch_size = memory.size(0)
 
@@ -124,7 +127,9 @@ class MultiHeadAttention(nn.Module):
         query, key, value = query.transpose(1, 2), key.transpose(1, 2), value.transpose(1, 2) # noqa E501
 
         if mask is not None:
-            mask = mask.unsqueeze(1)
+            mask = key_padding_mask
+        else:
+            mask = key_padding_mask + mask
 
         x, attention = self.attention(query, key, value, mask=mask)
         x = x.transpose(1, 2).contiguous()
@@ -171,14 +176,14 @@ class PostNet(nn.Module):
                                  kernel_size=5,
                                  padding=4,
                                  w_init_gain='tanh'))
-        
+
         for i in range(1, hp.model.n_postnet_convolutions - 1):
             convolutions.append(Conv(hp.model.dim_model,
                                      hp.model.dim_model,
                                      kernel_size=5,
                                      padding=4,
                                      w_init_gain='tanh'))
-        
+
         convolutions.append(Conv(hp.model.dim_model,
                                  hp.model.num_mels,
                                  kernel_size=5,
@@ -193,8 +198,9 @@ class PostNet(nn.Module):
         for conv in self.convolutions[:-1]:
             x = self.dropout(torch.tanh(self.batch_norm(conv(x))))
         x = self.dropout(self.batch_norm(self.convolutions[-1](x)))
-        
+
         return x
+
 
 class Encoder(nn.Module):
     def __init__(self):
@@ -233,8 +239,10 @@ class Decoder(nn.Module):
     def __init__(self):
         super(Decoder, self).__init__()
 
+        self.alpha = nn.Parameter(torch.ones(1))
         self.decoder_prenet = DecoderPreNet()
         self.positional_encoding = PositionalEncoding(hp.model.dim_model)
+        self.pos_dropout = nn.Dropout(dropout=0.1)
         self.masked_multihead_attention = MultiHeadAttention(hp.model.n_head,
                                                              hp.model.dim_model, # noqa E501
                                                              hp.model.num_mels,
@@ -250,6 +258,43 @@ class Decoder(nn.Module):
         self.gate_linear = Linear(hp.model.dim_model, 1)
         self.postnet = PostNet()
 
-    def forward(self, mel, encoder_output, c_mask, pos):                            
-        
+    def forward(self, encoder_output, decoder_input, c_mask, mel_pos):
+        batch_size = encoder_output.size(0)
+        decoder_len = decoder_input.size(1)
 
+        if self.training:
+            m_mask = mel_pos.ne(0).type(torch.float)
+            mask = mel_pos.eq(0).unsqueeze(1).repeat(1, decoder_len, 1)
+            if next(self.parameters()).is_cuda:
+                mask = mask + torch.triu(torch.ones(decoder_len, decoder_len).cuda(), diagonal=1).repeat(batch_size, 1, 1).byte() # noqa E501
+            else:
+                mask = mask + torch.triu(torch.ones(decoder_len, decoder_len), diagonal=1).repeat(batch_size, 1, 1).byte() # noqa E501
+            mask = mask.gt(0)
+            zero_mask = c_mask.eq(0).unsqueeze(-1).repeat(1, 1, decoder_len)
+            zero_mask = zero_mask.transpose(1, 2)
+        else:
+            if next(self.parameters()).is_cuda:
+                mask = torch.triu(torch.ones(decoder_len, decoder_len).cuda(), diagonal=1).repeat(batch_size, 1, 1).byte() # noqa E501
+            else:
+                mask = torch.triu(torch.ones(decoder_len, decoder_len), diagonal=1).repeat(batch_size, 1, 1).byte() # noqa E501 
+            mask = mask.gt(0)
+            m_mask, zero_mask = None, None
+
+        decoder_input = self.decoder_prenet(decoder_input)
+
+        mel_pos = self.positional_encoding(mel_pos)
+        decoder_input = decoder_input + mel_pos*self.alpha
+        decoder_input = self.pos_dropout(decoder_input)
+
+        decoder_output, attention_dec = self.masked_multihead_attention(decoder_input, decoder_input, mask=mask, key_padding_mask=m_mask) # noqa E501
+        decoder_output, attention_enc = self.multihead_attention(encoder_output, decoder_output, mask=zero_mask, key_padding_mask=m_mask) # noqa E501
+        decoder_output = self.feed_forward(decoder_output)
+
+        mel_output = self.mel_linear(decoder_output)
+        gate_output = self.gate_linear(decoder_output)
+
+        mel_output_postnet = self.postnet(mel_output)
+
+        out = mel_output + mel_output_postnet
+
+        return mel_output, out, gate_output, attention_dec, attention_enc
