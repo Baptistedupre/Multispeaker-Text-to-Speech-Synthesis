@@ -3,13 +3,6 @@ from scipy.io.wavfile import read
 import torch
 
 
-def get_mask_from_lengths(lengths):
-    max_len = torch.max(lengths).item()
-    ids = torch.arange(0, max_len, out=torch.cuda.LongTensor(max_len))
-    mask = (ids < lengths.unsqueeze(1)).bool()
-    return mask
-
-
 def load_wav_to_torch(full_path):
     sampling_rate, data = read(full_path)
     return torch.FloatTensor(data.astype(np.float32)), sampling_rate
@@ -47,3 +40,24 @@ def get_sinusoid_encoding_table(n_position, d_hid, padding_idx=None):
         sinusoid_table[padding_idx] = 0.
 
     return torch.FloatTensor(sinusoid_table)
+
+
+def get_lookahead_mask(padded_input):
+    seq_len = padded_input.shape[1]
+    mask = (
+        torch.triu(torch.ones((seq_len, seq_len), device=padded_input.device))
+        == 1
+    ).transpose(0, 1)
+    mask = (
+        mask.float()
+        .masked_fill(mask == 0, float("-inf"))
+        .masked_fill(mask == 1, float(0.0))
+    )
+    return mask.detach().to(padded_input.device)
+
+
+def get_mask_from_lengths(lengths):
+    max_len = torch.max(lengths).item()
+    ids = torch.arange(0, max_len, out=torch.cuda.LongTensor(max_len))
+    mask = (ids < lengths.unsqueeze(1)).bool()
+    return mask
