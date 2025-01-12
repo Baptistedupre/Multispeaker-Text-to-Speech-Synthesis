@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from params import hparams as hp
 from model import SpeakerEncoder
-from dataload import EncoderDataset
+from Encoder.dataset import EncoderDataset
 
 colormap = np.array([
     [76, 255, 0],

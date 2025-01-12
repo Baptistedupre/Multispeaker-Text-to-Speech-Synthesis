@@ -10,7 +10,7 @@ from loss import GE2ELoss
 from model import SpeakerEncoder
 from params import hparams as hp
 from utils import shuffle, unshuffle
-from dataload import EncoderDataset
+from Encoder.dataset import EncoderDataset
 
 
 def train():

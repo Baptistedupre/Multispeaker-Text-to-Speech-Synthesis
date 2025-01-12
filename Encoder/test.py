@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 from model import SpeakerEncoder
 from params import hparams as hp
 from utils import shuffle, unshuffle, similarity_matrix_centroids
-from dataload import EncoderDataset
+from Encoder.dataset import EncoderDataset
 
 
 def test():
