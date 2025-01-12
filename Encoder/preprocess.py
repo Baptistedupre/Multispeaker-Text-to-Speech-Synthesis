@@ -3,7 +3,7 @@ from tqdm import tqdm
 import glob
 import librosa
 import numpy as np
-from params import hparams as hp
+from Encoder.encoder_params import hparams as hp
 
 data_path = glob.glob(os.path.dirname(hp.unprocessed_data))
 

@@ -22,7 +22,7 @@ class DotDict(dict):
 
 
 def load_params():
-    with open('config/config.yaml', 'r') as f:
+    with open('/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/Multispeaker-Text-to-Speech-Synthesis/Encoder/config/config.yaml', 'r') as f: # noqa E501
         params = yaml.load_all(f, Loader=yaml.FullLoader)
         dict_params = {}
         for doc in params:

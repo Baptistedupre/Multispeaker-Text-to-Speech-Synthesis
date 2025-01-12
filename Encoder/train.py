@@ -8,7 +8,7 @@ from torch.nn.utils import clip_grad_norm_
 
 from loss import GE2ELoss
 from model import SpeakerEncoder
-from params import hparams as hp
+from Encoder.encoder_params import hparams as hp
 from utils import shuffle, unshuffle
 from Encoder.dataset import EncoderDataset
 

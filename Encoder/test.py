@@ -5,7 +5,7 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 
 from model import SpeakerEncoder
-from params import hparams as hp
+from Encoder.encoder_params import hparams as hp
 from utils import shuffle, unshuffle, similarity_matrix_centroids
 from Encoder.dataset import EncoderDataset
 

@@ -5,7 +5,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
-from params import hparams as hp
+from Encoder.encoder_params import hparams as hp
 from model import SpeakerEncoder
 from Encoder.dataset import EncoderDataset
 

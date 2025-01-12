@@ -5,7 +5,7 @@ import torch.nn as nn
 from torch.nn import functional as F
 
 from text.symbols import symbols
-from params import hparams as hp
+from Synthesizer.synthesizer_params import hparams as hp
 from .layers import Linear, Conv
 
 

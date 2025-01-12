@@ -22,6 +22,7 @@ train:
     weight_decay: 1e-6
     grad_clip_thresh: 1.0
     eg_text: 'OMAK is a thinking process which considers things always positively.'
+    train_path: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/Datasets/Synthesizer/train_data.npy'
 ---
 model: 
     num_mels: 80

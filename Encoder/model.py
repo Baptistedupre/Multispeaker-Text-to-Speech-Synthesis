@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from params import hparams as hp
+from Encoder.encoder_params import hparams as hp
 
 
 class SpeakerEncoder(nn.Module):

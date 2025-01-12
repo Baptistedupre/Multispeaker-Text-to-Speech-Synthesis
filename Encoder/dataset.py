@@ -2,7 +2,7 @@ import os
 import torch
 import random
 import numpy as np
-from params import hparams as hp
+from Encoder.encoder_params import hparams as hp
 from torch.utils.data import Dataset
 
 
