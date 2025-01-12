@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 from torch.utils.data import Dataset
-from synthesizer_params import hparams as hp
+from .synthesizer_params import hparams as hp
 
 
 class SynthesizerDataset(Dataset):
