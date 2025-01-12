@@ -5,13 +5,12 @@ import librosa
 import numpy as np
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
-from concurrent.futures import ProcessPoolExecutor, as_completed
 
 sys.path.append("/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/Multispeaker-Text-to-Speech-Synthesis") # noqa E501
 
-from Encoder.model import SpeakerEncoder
-from Encoder.inference import embed_utterance
-from Encoder.encoder_params import hparams as hp
+from Encoder.model import SpeakerEncoder # noqa E501
+from Encoder.inference import embed_utterance # noqa E501
+from Encoder.encoder_params import hparams as hp # noqa E501
 
 DATASET_PATH = '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/Datasets/LibriSpeech/train-clean-360' # noqa E501
 target_folder = '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/Datasets/Synthesizer' # noqa E501
