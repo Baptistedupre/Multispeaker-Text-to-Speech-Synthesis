@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 from torch.utils.data import Dataset
-from .synthesizer_params import hparams as hp
+from synthesizer_params import hparams as hp
 
 
 class SynthesizerDataset(Dataset):
@@ -41,7 +41,7 @@ def synthesizer_collate_fn(batch):
     for i, mel in enumerate(mels):
         mel_padded[i, :, :mel.shape[1]] = torch.tensor(mel, dtype=torch.float32) # noqa E501
 
-    speaker_embeddings_tensor = torch.tensor(speaker_embeddings, dtype=torch.float32) # noqa E501 
+    speaker_embeddings_tensor = torch.tensor(np.array(speaker_embeddings), dtype=torch.float32) # noqa E501 
 
     return {
         "text_padded": text_padded,

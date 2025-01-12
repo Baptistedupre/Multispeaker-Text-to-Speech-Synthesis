@@ -5,39 +5,25 @@ import torch.nn as nn
 from torch.nn import functional as F
 
 from text.symbols import symbols
-from Synthesizer.synthesizer_params import hparams as hp
+from synthesizer_params import hparams as hp
 from .layers import Linear, Conv
 
 
 class PositionalEncoding(nn.Module):
-    def __init__(self, input_size, max_len=2500):
+    def __init__(self, d_model: int, dropout: float = 0.1, max_len: int = 1024): # noqa E501
         super(PositionalEncoding, self).__init__()
-
-        if input_size % 2 != 0:
-            raise ValueError(
-                f"Cannot use sin/cos positional encoding with odd channels (got channels={input_size})" # noqa E501
-            )
-
-        self.max_len = max_len
-        pe = torch.zeros(self.max_len, input_size, requires_grad=False)
-        positions = torch.arange(0, self.max_len).unsqueeze(1).float()
-        denominator = torch.exp(
-            torch.arange(0, input_size, 2).float()
-            * -(log(10000.0) / input_size)
-        )
-
-        pe[:, 0::2] = torch.sin(positions * denominator)
-        pe[:, 1::2] = torch.cos(positions * denominator)
-        pe = pe.unsqueeze(0)
-        self.register_buffer("pe", pe)
-
-        self.alpha = nn.Parameter(torch.Tensor(1))
-
-        nn.init.normal_(self.alpha)
+        self.dropout = nn.Dropout(p=dropout)
+        position = torch.arange(max_len).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2) * (-log(10000.0) / d_model)) # noqa E501
+        pe = torch.zeros(max_len, 1, d_model)
+        pe[:, 0, 0::2] = torch.sin(position * div_term)
+        pe[:, 0, 1::2] = torch.cos(position * div_term)
+        self.register_buffer('pe', pe)
 
     def forward(self, x):
-        scaled_pos_embedding = self.alpha * self.pe[:, : x.size(1)].clone().detach() # noqa E501
-        return scaled_pos_embedding
+        x = x.transpose(0, 1)
+        x = x + self.pe[:x.size(0)]
+        return self.dropout(x.transpose(0, 1))
 
 
 class EncoderPreNet(nn.Module):
@@ -236,14 +222,14 @@ class Encoder(nn.Module):
 
     def forward(self, x, speaker_embedding, pos):
         if self.training:
-            c_mask = pos.ne(0).type(float)
+            c_mask = pos.ne(0).type(torch.float)
             mask = pos.eq(0).unsqueeze(1).repeat(1, x.size(1), 1)
         else:
             c_mask, mask = None, None
 
         x = self.encoder_prenet(x)
 
-        pos = self.positional_encoding(pos)
+        pos = self.positional_encoding(x)
         x = self.pos_dropout(x + pos*self.alpha)
 
         x, attention = self.multihead_attention(x, x, mask=mask)
