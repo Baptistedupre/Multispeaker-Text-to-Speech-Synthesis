@@ -13,10 +13,11 @@ class TransformerTTSLoss(nn.Module):
         mel_target, gate_target = targets[0], targets[1]
         mel_target.requires_grad = False
         gate_target.requires_grad = False
+        gate_target = gate_target.view(-1, 1)
 
         mel_out_postnet, mel_out, gate_out = mel_output
         gate_out = gate_out.view(-1, 1)
-
+        mel_target = mel_target.transpose(1, 2)
         mel_loss = self.mel_loss(mel_out, mel_target) + self.mel_loss(mel_out_postnet, mel_target) # noqa E501
         gate_loss = self.gate_loss(gate_out, gate_target) * self.r_gate
 

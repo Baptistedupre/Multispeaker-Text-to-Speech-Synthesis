@@ -1,5 +1,4 @@
 import torch
-from sys import exit
 from tqdm import tqdm
 import torch.optim as optim
 from dataset import SynthesizerDataset, synthesizer_collate_fn
@@ -40,7 +39,6 @@ def train_synthesizer(num_epochs, save_path, batch_size, log_interval=10):
             mel = batch["mel_padded"].to(device)
             mel_lengths = batch["mel_lengths"].to(device)
             speaker_embeddings = batch["speaker_embeddings"].to(device)
-
             output = model(text, text_lengths, mel, mel_lengths, speaker_embeddings) # noqa E501
             model_outputs = output[0], output[1], output[2]
 
@@ -70,7 +68,6 @@ def train_synthesizer(num_epochs, save_path, batch_size, log_interval=10):
                 mel = batch["mel_padded"].to(device)
                 mel_lengths = batch["mel_lengths"].to(device)
                 speaker_embeddings = batch["speaker_embeddings"].to(device)
-
                 output = model(text, text_lengths, mel, mel_lengths, speaker_embeddings) # noqa E501
                 model_outputs = output[0], output[1], output[2]
 
@@ -79,7 +76,7 @@ def train_synthesizer(num_epochs, save_path, batch_size, log_interval=10):
                 for i, mel_len in enumerate(mel_lengths):
                     gate_target[i, mel_len - 1:] = 1.0
 
-                loss = criterion(model_outputs, (mel, gate_target))
+                loss = criterion(model_outputs, (mel, gate_target)) # noqa E501
                 val_loss += loss.item()
 
         avg_val_loss = val_loss / len(val_loader)
@@ -99,4 +96,4 @@ def train_synthesizer(num_epochs, save_path, batch_size, log_interval=10):
 
 if __name__ == "__main__":
     save_path = '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/Models/Synthesizer/transformer_tts.pt' # noqa E501
-    train_synthesizer(num_epochs=50, save_path=save_path, batch_size=32)
+    train_synthesizer(num_epochs=50, save_path=save_path, batch_size=16)
