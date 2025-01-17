@@ -35,7 +35,7 @@ def train():
     ge2e_loss = GE2ELoss(device)
 
     if hp.train.restore:
-        model.load_state_dict(torch.load(os.path.join(hp.train.checkpoint_dir, 'checkpoint_10_10.pt'), weights_only=True)['model_state'])
+        model.load_state_dict(torch.load(os.path.join(hp.train.checkpoint_dir, 'checkpoint.pt'), weights_only=True)['model_state'])
 
     optimizer = torch.optim.SGD([
                 {'params': model.parameters()},
