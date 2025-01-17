@@ -3,8 +3,8 @@ device: "mps"
 unprocessed_data: 'Datasets/LibriSpeech/train-clean-360/*/*'
 ---
 data:
-    train_path: 'Datasets/train'
-    test_path: 'Datasets/test'
+    train_path: 'Datasets/Encoder/train'
+    test_path: 'Datasets/Encoder/test'
     sr: 16000
     nfft: 512 #For mel spectrogram preprocess
     window: 0.025 #(s)
@@ -27,7 +27,7 @@ train:
     epochs: 800 #Max training speaker epoch 
     log_interval: 30 #Epochs before printing progress
     checkpoint_interval: 120 #Save model after x speaker epochs
-    checkpoint_dir: 'Models/checkpoints'
+    checkpoint_dir: 'Models/Encoder/checkpoints'
     restore: !!bool "false" #Resume training from previous model path
 ---
 test:
