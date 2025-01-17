@@ -50,7 +50,7 @@ pip install torch torchaudio numpy librosa
 ### Running the Model
 1. **Train the Speaker Encoder**:
    ```bash
-   python train_speaker_encoder.py
+   python Encoder.train.py
    ```
 2. **Train the Synthesizer**:
    ```bash
