@@ -55,7 +55,7 @@ def train_synthesizer(num_epochs, save_path, batch_size, log_interval=300):
 
             mel_pred, mel_postnet_pred, stop_pred, attn_enc, self_attn, dot_attn = model(text, pos_text, mel_input, pos_mel, speaker_embedding) # noqa E501
 
-            loss = nn.L1Loss()(mel_pred, mel) + nn.L1Loss()(mel_postnet_pred, mel)
+            loss = criterion((mel_postnet_pred, mel_pred, stop_pred), (mel, stop_tokens))
             optimizer.zero_grad()
             loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), 1.)
@@ -109,7 +109,7 @@ def train_synthesizer(num_epochs, save_path, batch_size, log_interval=300):
                 stop_tokens = torch.abs(pos_mel.ne(0).type(torch.float) - 1)
 
                 mel_pred, mel_postnet_pred, stop_pred, attn_enc, self_attn, dot_attn = model(text, pos_text, mel_input, pos_mel, speaker_embedding) # noqa E501
-                loss = nn.L1Loss()(mel_pred, mel) + nn.L1Loss()(mel_postnet_pred, mel)
+                loss = criterion((mel_postnet_pred, mel_pred, stop_pred), (mel, stop_tokens))
 
                 val_loss.append(loss.item())
                 val_loss_tot += loss.item()
@@ -123,12 +123,12 @@ def train_synthesizer(num_epochs, save_path, batch_size, log_interval=300):
             torch.save(model.state_dict(), save_path)
             print(f"Model saved to {save_path} (Best validation loss: {best_val_loss:.4f})") # noqa E501
 
-        np.save('/Users/hifat/OneDrive/Bureau/AML Project/Saved Models/Synthesizer/train_loss_last_resort.npy', train_loss)
-        np.save('/Users/hifat/OneDrive/Bureau/AML Project/Saved Models/Synthesizer/val_loss_last_resort.npy', val_loss)
+        np.save('Models/Synthesizer/train_loss_50epochs.npy', train_loss)
+        np.save('Models/Synthesizer/val_loss_50epochs.npy', val_loss)
 
     print("Training completed!")
     
 
 if __name__ == "__main__":
-    save_path = '/Users/hifat/OneDrive/Bureau/AML Project/Saved Models/Synthesizer/model_last_resort.pt' # noqa E501
+    save_path = 'Models/Synthesizer/model_50epochs.pt' # noqa E501
     train_synthesizer(num_epochs=50, save_path=save_path, batch_size=8)
