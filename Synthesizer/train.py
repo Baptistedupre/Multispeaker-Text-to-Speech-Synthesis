@@ -11,6 +11,7 @@ from model.loss import TransformerTTSLoss
 from synthesizer_params import hparams as hp
 import matplotlib.pyplot as plt
 
+
 def adjust_learning_rate(optimizer, step_num, warmup_step=4000):
     lr = hp.train.lr * warmup_step**0.5 * min(step_num*warmup_step**-1.5, step_num**-0.5)
     for param_group in optimizer.param_groups:
@@ -26,7 +27,8 @@ def save_mel_spectrogram(mel, epoch, batch_idx, name, save_path):
     plt.tight_layout()
     plt.savefig(f'{save_path}/{name}_{epoch}_{batch_idx}.png') # noqa E501
     plt.close()
-    
+
+
 def train_synthesizer(num_epochs, save_path, batch_size, log_interval=300):
     global_step = 0
     device = "cuda"
