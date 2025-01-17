@@ -18,6 +18,6 @@ class GE2ELoss(nn.Module):
         loss, _ = calc_loss(sim_matrix)
         """
         torch.clamp(self.w, 1e-6)
-        sim_matrix = similarity_matrix(embeddings, self.w, self.b, 'cpu') # noqa E501
+        sim_matrix = similarity_matrix(embeddings, self.w, self.b, self.device) # noqa E501
         loss, _ = calc_loss(sim_matrix)
         return loss

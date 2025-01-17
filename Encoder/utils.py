@@ -67,8 +67,8 @@ def similarity_matrix_centroids(embeddings, centroids, device):
 
 def calc_loss(similarity_matrix):
     idx = list(range(similarity_matrix.size(0)))
-    pos = sim_matrix[idx, :, idx]
-    neg = torch.log(torch.sum(torch.exp(sim_matrix), dim=2))
+    pos = similarity_matrix[idx, :, idx]
+    neg = torch.log(torch.sum(torch.exp(similarity_matrix), dim=2))
     loss_matrix = neg - pos
     loss = torch.sum(loss_matrix)
     return loss, loss_matrix
@@ -91,5 +91,4 @@ if __name__ == "__main__":
     embeddings = torch.tensor([[0,1,0],[0,0,1], [0,1,0], [0,1,0], [1,0,0], [1,0,0]]).to(torch.float).reshape(3,2,3) # noqa E501
     sim_matrix = similarity_matrix(embeddings, w, b, 'cpu')
     loss, per_embedding_loss = calc_loss(sim_matrix)
-    mask = sim_matrix > 2e-6
-    print(mask[0].float().sum())
+    print(loss)
