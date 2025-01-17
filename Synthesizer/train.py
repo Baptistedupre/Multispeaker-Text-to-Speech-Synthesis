@@ -76,7 +76,7 @@ def train_synthesizer(num_epochs, save_path, batch_size, log_interval=300):
                 plt.colorbar(format='%+2.0f dB')
                 plt.title('Actual mel spectrogram')
                 plt.tight_layout()
-                plt.savefig(f'/Users/hifat/OneDrive/Bureau/AML Project/Saved Models/Synthesizer/actual_mel_{epoch}_{batch_idx}_last_resort.png') # noqa E501
+                plt.savefig(f'Models/Synthesizer/actual_mel_{epoch}_{batch_idx}_50epochs.png') # noqa E501
                 plt.close()
                 plt.figure(figsize=(10, 4))
                 plt.imshow(
@@ -89,7 +89,7 @@ def train_synthesizer(num_epochs, save_path, batch_size, log_interval=300):
                 plt.colorbar(format='%+2.0f dB')
                 plt.title('Pred mel spectrogram')
                 plt.tight_layout()
-                plt.savefig(f'/Users/hifat/OneDrive/Bureau/AML Project/Saved Models/Synthesizer/pred_mel_{epoch}_{batch_idx}_last_resort.png') # noqa E501
+                plt.savefig(f'Models/Synthesizer/pred_mel_{epoch}_{batch_idx}_50epochs.png') # noqa E501
                 plt.close()
 
         avg_train_loss = train_loss_tot / len(train_loader)
