@@ -14,8 +14,8 @@ import soundfile as sf
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def load_checkpoint():
-    state_dict = torch.load('/Users/hifat/OneDrive/Bureau/AML Project/Saved Models/Synthesizer/model_2.pt')   
+def load_checkpoint(model_path):
+    state_dict = torch.load(model_path, weights_only=True)   
     new_state_dict = OrderedDict()
     for k, value in state_dict.items():
         key = k[7:]
