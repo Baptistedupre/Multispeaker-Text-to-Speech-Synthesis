@@ -27,7 +27,7 @@ def load_checkpoint(model_path):
 def synthesis(text, speaker_embedding, max_len):
     model = TransformerTTS().to(device)
 
-    model.load_state_dict(torch.load('/Users/hifat/OneDrive/Bureau/AML Project/Saved Models/Synthesizer/model_50epochs.pt', weights_only=True))
+    model.load_state_dict(load_checkpoint(hp.model.model_path))
     model.eval()
 
     text = np.asarray(text_to_sequence(text, ['english_cleaners']))
