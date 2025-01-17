@@ -16,6 +16,17 @@ def adjust_learning_rate(optimizer, step_num, warmup_step=4000):
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
+
+def save_mel_spectrogram(mel, epoch, batch_idx, name, save_path):
+    plt.figure(figsize=(10, 4))
+    plt.imshow(mel[0].detach().cpu().numpy().T, aspect='auto',
+               origin='lower', interpolation='none', cmap='viridis')
+    plt.colorbar(format='%+2.0f dB')
+    plt.title('Actual mel spectrogram')
+    plt.tight_layout()
+    plt.savefig(f'{save_path}/{name}_{epoch}_{batch_idx}.png') # noqa E501
+    plt.close()
+    
 def train_synthesizer(num_epochs, save_path, batch_size, log_interval=300):
     global_step = 0
     device = "cuda"
@@ -65,33 +76,8 @@ def train_synthesizer(num_epochs, save_path, batch_size, log_interval=300):
             train_loss_tot += loss.item()
             if batch_idx % log_interval == 0:
                 print(f"Batch {batch_idx}, Loss: {loss.item():.4f}")
-                plt.figure(figsize=(10, 4))
-                plt.imshow(
-                    mel[0].detach().cpu().numpy().T,
-                    aspect='auto',
-                    origin='lower',
-                    interpolation='none',
-                    cmap='viridis'
-                    )
-                plt.colorbar(format='%+2.0f dB')
-                plt.title('Actual mel spectrogram')
-                plt.tight_layout()
-                plt.savefig(f'Models/Synthesizer/actual_mel_{epoch}_{batch_idx}_50epochs.png') # noqa E501
-                plt.close()
-                plt.figure(figsize=(10, 4))
-                plt.imshow(
-                    mel_pred[0].detach().cpu().numpy().T,
-                    aspect='auto',
-                    origin='lower',
-                    interpolation='none',
-                    cmap='viridis'
-                    )
-                plt.colorbar(format='%+2.0f dB')
-                plt.title('Pred mel spectrogram')
-                plt.tight_layout()
-                plt.savefig(f'Models/Synthesizer/pred_mel_{epoch}_{batch_idx}_50epochs.png') # noqa E501
-                plt.close()
-
+                save_mel_spectrogram(mel, epoch, batch_idx, 'Actual', save_path_plots)
+                save_mel_spectrogram(mel_postnet_pred, epoch, batch_idx, 'Predicted', save_path_plots)
         avg_train_loss = train_loss_tot / len(train_loader)
         print(f"Epoch {epoch + 1}, Average Training Loss: {avg_train_loss:.4f}") # noqa E501
 
@@ -131,4 +117,5 @@ def train_synthesizer(num_epochs, save_path, batch_size, log_interval=300):
 
 if __name__ == "__main__":
     save_path = 'Models/Synthesizer/model_50epochs.pt' # noqa E501
-    train_synthesizer(num_epochs=50, save_path=save_path, batch_size=8)
+    save_path_plots = 'Models/Synthesizer'
+    train_synthesizer(num_epochs=50, save_path=save_path, save_path_plots=save_path_plots, batch_size=8)
