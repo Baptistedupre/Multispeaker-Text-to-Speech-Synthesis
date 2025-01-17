@@ -128,7 +128,7 @@ if __name__ == "__main__":
     # embeddings = compute_speakers_embedding(DATASET_PATH, model, device)
     # np.save(os.path.join(target_folder, "speaker_embeddings.npy"), embeddings) # noqa E501
     embeddings = np.load(os.path.join(target_folder, "speaker_embeddings.npy"), allow_pickle=True).item() # noqa E501
-    complete_dataset = process_all_speakers(DATASET_PATH, 500, embeddings)
+    complete_dataset = process_all_speakers(hp.train.train_path, 500, embeddings)
     train_data, test_data = train_test_split(complete_dataset, test_size=0.1)
     train_path = os.path.join(target_folder, "train_data.npy")
     test_path = os.path.join(target_folder, "test_data.npy")
