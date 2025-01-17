@@ -54,11 +54,7 @@ pip install torch torchaudio numpy librosa
    ```
 2. **Train the Synthesizer**:
    ```bash
-   python train_synthesizer.py
-   ```
-3. **Generate Speech**:
-   ```bash
-   python synthesize.py --text "Hello, world!" --speaker_audio sample.wav
+   python Synthesizer.train.py
    ```
 
 ---
