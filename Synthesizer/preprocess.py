@@ -6,15 +6,12 @@ import numpy as np
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 
-sys.path.append("/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/Multispeaker-Text-to-Speech-Synthesis") # noqa E501
-
 from Encoder.model import SpeakerEncoder # noqa E501
 from Encoder.inference import embed_utterance # noqa E501
 from Encoder.encoder_params import hparams as hp # noqa E501
 
-DATASET_PATH = '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/Datasets/LibriSpeech/train-clean-360' # noqa E501
-target_folder = '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/Datasets/Synthesizer' # noqa E501
-device = torch.device("mps" if torch.backends.mps.is_built() else "cpu")
+target_folder = 'Datasets/Synthesizer' # noqa E501
+device = torch.device("cuda" if torch.cuda().is_available() else "cpu")
 model = SpeakerEncoder().to(device)
 model.load_state_dict(torch.load(os.path.join(hp.model.model_path, 'model_final.pt'), weights_only=True)) # noqa E501
 
