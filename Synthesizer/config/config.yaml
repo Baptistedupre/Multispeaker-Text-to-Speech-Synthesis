@@ -17,6 +17,7 @@ train:
     train_path: 'Datasets/Synthesizer/train_data.npy'
 ---
 model: 
+    model_path: 'Models/Synthesizer/model_final.pt
     num_mels: 80
     num_freq: 513
     sample_rate: 22050
