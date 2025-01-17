@@ -63,8 +63,21 @@ pip install torch torchaudio numpy librosa
 
 ---
 
+## Repository Inspirations
+This repository is implemented from scratch but was inspired by several existing projects that have contributed significantly to Text-to-Speech synthesis and speaker verification research. These include:
+
+- [Transformer-TTS by choiHkk](https://github.com/choiHkk/Transformer-TTS): Provides a Transformer-based TTS model that enhances synthesis efficiency.
+- [Transformer-TTS by soobinseo](https://github.com/soobinseo/Transformer-TTS): Another implementation of Transformer-based TTS, serving as a reference for our model.
+- [Real-Time Voice Cloning by CorentinJ](https://github.com/CorentinJ/Real-Time-Voice-Cloning): Implements the SV2TTS framework for speaker adaptation using few-shot learning.
+- [PyTorch Speaker Verification by HarryVolek](https://github.com/HarryVolek/PyTorch_Speaker_Verification): A reference implementation for training a speaker encoder using the GE2E loss.
+
+These repositories provided valuable insights into the architectural choices and training strategies used in our model.
+
+--- 
+
 ## References
 - [SV2TTS Paper](https://arxiv.org/abs/1806.04558)
 - [TransformerTTS Paper](https://arxiv.org/abs/2005.10380)
 - [Generalized End-to-End Loss](https://arxiv.org/abs/1710.10467)
+
 
