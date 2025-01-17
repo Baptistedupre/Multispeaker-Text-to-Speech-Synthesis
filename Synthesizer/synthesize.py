@@ -77,21 +77,5 @@ def synthesis(text, speaker_embedding, max_len):
     
 
 if __name__ == '__main__':
-    speaker_embedding = np.load('/Users/hifat/OneDrive/Bureau/AML Project/Datasets/Synthesizer/test_data_bon_sr_golmon.npy', allow_pickle=True)[3]['mel_spectrogram'].transpose()
-    #Synthesis("ON THE RIGHT BANK OF THE AUFIDUS THE NEXT MORNING EMILIUS WHO WAS IN COMMAND DETACHED A THIRD OF HIS FORCE ACROSS THE RIVER AND ENCAMPED THEM THERE FOR THE PURPOSE OF SUPPORTING THE ROMAN FORAGING PARTIES ON THAT SIDE AND OF INTERRUPTING THOSE OF THE CARTHAGINIANS", speaker_embedding, 400)
-    plt.figure(figsize=(10, 4))
-    plt.imshow(
-        speaker_embedding,
-        aspect='auto',
-        origin='lower',
-        interpolation='none',
-        cmap='viridis'
-    )
-    plt.colorbar(format='%+2.0f dB')
-    plt.title('Mel spectrogram')
-    plt.tight_layout()
-    plt.show()
-    #train_loss = np.load('/Users/hifat/OneDrive/Bureau/AML Project/Saved Models/Synthesizer/train_loss_high_res_6layers.npy', allow_pickle=True)
-
-    #plt.plot(train_loss)
-    #plt.show()
+    speaker_embedding = np.load('/Users/hifat/OneDrive/Bureau/AML Project/Datasets/Synthesizer/test_data_bon_sr_golmon.npy', allow_pickle=True)[3]['speaker_embedding']
+    Synthesis("ON THE RIGHT BANK OF THE AUFIDUS THE NEXT MORNING EMILIUS WHO WAS IN COMMAND DETACHED A THIRD OF HIS FORCE ACROSS THE RIVER AND ENCAMPED THEM THERE FOR THE PURPOSE OF SUPPORTING THE ROMAN FORAGING PARTIES ON THAT SIDE AND OF INTERRUPTING THOSE OF THE CARTHAGINIANS", speaker_embedding, 400)
