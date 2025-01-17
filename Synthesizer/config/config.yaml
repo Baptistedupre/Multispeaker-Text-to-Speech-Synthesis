@@ -25,7 +25,7 @@ train:
     train_path: '/Users/bapt/Desktop/ENSAE/3ème Année/Advanced Machine Learning/Datasets/Synthesizer/train_data.npy'
 ---
 model: 
-    num_mels: 40
+    num_mels: 80
     num_freq: 513
     sample_rate: 22050
     frame_shift: 256
